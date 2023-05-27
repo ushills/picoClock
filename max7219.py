@@ -1,5 +1,6 @@
 from machine import SPI, Pin
 from micropython import const
+import time
 
 _noOp = const(0)
 _decodemode = const(9)
@@ -12,7 +13,7 @@ _matrixColumns = const(8)
 _matrixRows = const(8)
 
 
-spi = SPI(0, sck=Pin(2), baudrate=8000000, mosi=Pin(3))
+spi = SPI(0, sck=Pin(2), baudrate=10000000, mosi=Pin(3))
 cs = Pin(5, Pin.OUT)
 
 # Character set
@@ -48,7 +49,7 @@ def buildMatrix(xPos, yPos, digitNumber):
     for y in range(yPos):
         matrixData.append("0" * (_numberOfMatrix * _matrixColumns))
 
-    # build the matrix row by row starting at 0 + yPos
+    # build the matrix row by row starting at 0 + yPosm
     for row in range(_matrixRows - 1 - yPos):
         rowData = ""
         for c in digitNumber:
@@ -62,20 +63,21 @@ def buildMatrix(xPos, yPos, digitNumber):
 
     # fill any missing rows with zeros
     if len(matrixData) != _matrixRows:
-        matrixData.append("0" * ((_numberOfMatrix * _matrixColumns) - len(matrixData)))
+        matrixData.append("0" * (_numberOfMatrix * _matrixColumns))
     return matrixData
 
 
 def displaySend(matrix):
     # data has to be sent a row at a time with
     # a cs(0) in advance and a cs(1) post
+    # displayCommand(_shutdown, 0)
     for row in range(len(matrix)):
         bytestoSend = extractBytes(matrix[row])
         cs(0)
         for b in bytestoSend:
-            print(b)
             spi.write(bytearray([row + 1, b]))
         cs(1)
+    # displayCommand(_shutdown, 1)
 
 
 def displayCommand(command, data):
@@ -113,5 +115,16 @@ displayClear()
 displayCommand(_shutdown, 1)
 
 
-matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 6, 12])
-print(displaySend(matrix))
+matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 6, 11])
+print(matrix)
+displaySend(matrix)
+
+time.sleep(1)
+
+matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 7, 11])
+displaySend(matrix)
+
+time.sleep(1)
+
+matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 8, 11])
+displaySend(matrix)
