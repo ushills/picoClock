@@ -119,16 +119,5 @@ displayClear()
 displayCommand(_shutdown, 1)
 
 
-matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 6, 12])
-print(matrix)
-displaySend(matrix)
-
-time.sleep(1)
-
-matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 7, 12])
-displaySend(matrix)
-
-time.sleep(1)
-
-matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 8, 12])
-displaySend(matrix)
+# matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 6, 12])
+# displaySend(matrix)
