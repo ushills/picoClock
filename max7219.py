@@ -30,7 +30,8 @@ digits = [
     ["1111", "1001", "1001", "1111", "0001", "0001", "0001"],  # 9
     ["0000", "0000", "0000", "0000", "0000", "0000", "0000"],  # space (10)
     ["000", "010", "010", "000", "010", "010", "000"],  # comma (11)
-    ["0", "0", "0", "0", "0", "0", "0"],  # separator (12)
+    ["000", "000", "000", "000", "000", "000", "010"],  # period (12)
+    ["0", "0", "0", "0", "0", "0", "0"],  # separator (13)
 ]
 
 
@@ -51,18 +52,19 @@ def buildMatrix(xPos, yPos, digitNumber):
     # build the matrix row by row starting at 0 + yPosm
     for row in range(_matrixRows - 1):
         rowData = ""
+        # populate with leading zeros depending on xPos
+        rowData = rowData + ("0" * xPos)
         for c in digitNumber:
             rowData = rowData + digits[c][row]
         # check the row is full with digits, if not add trailing zeros
-        if len(rowData) != _numberOfMatrix * _matrixColumns:
-            rowData = rowData + (
-                "0" * ((_numberOfMatrix * _matrixColumns) - len(rowData))
-            )
+        while len(rowData) < _numberOfMatrix * _matrixColumns:
+            rowData = rowData + "0"
+        while len(rowData) > _numberOfMatrix * _matrixColumns:
+            rowData = rowData[:-1]
         matrixData.append(rowData)
 
     # fill any missing rows with zeros
     if len(matrixData) < _matrixRows:
-        print("adding a blank row")
         matrixData.append("0" * (_numberOfMatrix * _matrixColumns))
 
     # cut of the last rows if larger than the matrix size
@@ -117,16 +119,16 @@ displayClear()
 displayCommand(_shutdown, 1)
 
 
-matrix = buildMatrix(0, 1, [2, 12, 2, 11, 4, 12, 6, 11])
+matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 6, 12])
 print(matrix)
 displaySend(matrix)
 
-# time.sleep(1)
+time.sleep(1)
 
-# matrix = buildMatrix(0, 1, [2, 12, 2, 11, 4, 12, 7, 11])
-# displaySend(matrix)
+matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 7, 12])
+displaySend(matrix)
 
-# time.sleep(1)
+time.sleep(1)
 
-# matrix = buildMatrix(0, 1, [2, 12, 2, 11, 4, 12, 8, 11])
-# displaySend(matrix)
+matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 8, 12])
+displaySend(matrix)
