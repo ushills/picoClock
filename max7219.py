@@ -38,7 +38,6 @@ def extractBytes(data):
     bytesList = []
     for i in range(len(data) // 8):
         bits = data[((i * 8)) : ((1 + i) * 8)]
-        # print(bits)
         bytesList.append(int(bits, 2))
     return bytesList
 
@@ -50,7 +49,7 @@ def buildMatrix(xPos, yPos, digitNumber):
         matrixData.append("0" * (_numberOfMatrix * _matrixColumns))
 
     # build the matrix row by row starting at 0 + yPosm
-    for row in range(_matrixRows - 1 - yPos):
+    for row in range(_matrixRows - 1):
         rowData = ""
         for c in digitNumber:
             rowData = rowData + digits[c][row]
@@ -62,22 +61,25 @@ def buildMatrix(xPos, yPos, digitNumber):
         matrixData.append(rowData)
 
     # fill any missing rows with zeros
-    if len(matrixData) != _matrixRows:
+    if len(matrixData) < _matrixRows:
+        print("adding a blank row")
         matrixData.append("0" * (_numberOfMatrix * _matrixColumns))
+
+    # cut of the last rows if larger than the matrix size
+    while len(matrixData) > _matrixRows:
+        matrixData.pop()
     return matrixData
 
 
 def displaySend(matrix):
     # data has to be sent a row at a time with
     # a cs(0) in advance and a cs(1) post
-    # displayCommand(_shutdown, 0)
     for row in range(len(matrix)):
         bytestoSend = extractBytes(matrix[row])
         cs(0)
         for b in bytestoSend:
             spi.write(bytearray([row + 1, b]))
         cs(1)
-    # displayCommand(_shutdown, 1)
 
 
 def displayCommand(command, data):
@@ -115,16 +117,16 @@ displayClear()
 displayCommand(_shutdown, 1)
 
 
-matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 6, 11])
+matrix = buildMatrix(0, 1, [2, 12, 2, 11, 4, 12, 6, 11])
 print(matrix)
 displaySend(matrix)
 
-time.sleep(1)
+# time.sleep(1)
 
-matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 7, 11])
-displaySend(matrix)
+# matrix = buildMatrix(0, 1, [2, 12, 2, 11, 4, 12, 7, 11])
+# displaySend(matrix)
 
-time.sleep(1)
+# time.sleep(1)
 
-matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 8, 11])
-displaySend(matrix)
+# matrix = buildMatrix(0, 1, [2, 12, 2, 11, 4, 12, 8, 11])
+# displaySend(matrix)
