@@ -42,8 +42,8 @@ def getUTCTime():
 
 
 # connect_wifi()
-# matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 6, 12])
-# displaySend(matrix)
+matrix = buildMatrix(0, 0, [2, 13, 2, 11, 4, 13, 6, 13, 2, 13, 3])
+displaySend(matrix)
 
 
 def main():
@@ -51,12 +51,18 @@ def main():
     # check if connected to wifi, if not connect
     connect_wifi()
     getUTCTime()
-    print(currentTime)
     currentTime = updateCurrentTime(currentTime)
     print(currentTime)
     while True:
-        if currentTime == updateCurrentTime(currentTime):
+        if rtc.datetime()[0:7] != currentTime:
+            currentTime = rtc.datetime()[0:7]
             print(currentTime)
+            hour, minute, second = (
+                str(currentTime[4]),
+                str(currentTime[5]),
+                str(currentTime[6]),
+            )
+            print(hour + ":" + minute + "." + second)
 
 
 def updateCurrentTime(currentTime):
