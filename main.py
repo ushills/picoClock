@@ -57,12 +57,46 @@ def main():
         if rtc.datetime()[0:7] != currentTime:
             currentTime = rtc.datetime()[0:7]
             print(currentTime)
-            hour, minute, second = (
-                str(currentTime[4]),
-                str(currentTime[5]),
-                str(currentTime[6]),
-            )
-            print(hour + ":" + minute + "." + second)
+            formattedTime = formatTime(currentTime[4:7])
+            print(formattedTime)
+            # matrix = buildMatrix(
+            #     0,
+            #     0,
+            #     [
+            #         int(hour[0]),
+            #         13,
+            #         int(hour[1]),
+            #         11,
+            #         int(minute[0]),
+            #         13,
+            #         int(minute[1]),
+            #         13,
+            #         int(second[0]),
+            #         int(second[1]),
+            #     ],
+            # )
+            # displaySend(matrix)
+
+
+def formatTime(currentTime):
+    print(currentTime)
+    formattedTime = []
+    returnedTime = []
+    # convert all digits to strings
+    for t in currentTime:
+        formattedTime.append(str(t))
+
+    # build a list of individual ints
+    if len(formattedTime[0]) < 2:
+        returnedTime.append(0)
+    returnedTime.append(int(formattedTime[0]))
+    if len(formattedTime[1]) < 2:
+        returnedTime.append(0)
+    returnedTime.append(int(formattedTime[1]))
+    if len(formattedTime[2]) < 2:
+        returnedTime.append(0)
+    returnedTime.append(int(formattedTime[2]))
+    return returnedTime
 
 
 def updateCurrentTime(currentTime):
