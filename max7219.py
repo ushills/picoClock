@@ -37,7 +37,7 @@ def extractBytes(data):
     bytesList = []
     for i in range(len(data) // 8):
         bits = data[((i * 8)) : ((1 + i) * 8)]
-        print(bits)
+        # print(bits)
         bytesList.append(int(bits, 2))
     return bytesList
 
@@ -56,7 +56,7 @@ def buildMatrix(xPos, yPos, digitNumber):
         # check the row is full with digits, if not add trailing zeros
         if len(rowData) != _numberOfMatrix * _matrixColumns:
             rowData = rowData + (
-                "0" * ((_NumberOfMatrix * _matrixColumns) - len(rowData))
+                "0" * ((_numberOfMatrix * _matrixColumns) - len(rowData))
             )
         matrixData.append(rowData)
 
@@ -64,6 +64,18 @@ def buildMatrix(xPos, yPos, digitNumber):
     if len(matrixData) != _matrixRows:
         matrixData.append("0" * ((_numberOfMatrix * _matrixColumns) - len(matrixData)))
     return matrixData
+
+
+def displaySend(matrix):
+    # data has to be sent a row at a time with
+    # a cs(0) in advance and a cs(1) post
+    for row in range(len(matrix)):
+        bytestoSend = extractBytes(matrix[row])
+        cs(0)
+        for b in bytestoSend:
+            print(b)
+            spi.write(bytearray([row + 1, b]))
+        cs(1)
 
 
 def displayCommand(command, data):
@@ -95,7 +107,11 @@ def displayClear():
 
 displayInit()
 displayCommand(_shutdown, 0)
-displayCommand(_intensity, 1)
+displayCommand(_intensity, 5)
 displayClear()
 
 displayCommand(_shutdown, 1)
+
+
+matrix = buildMatrix(0, 0, [2, 12, 2, 11, 4, 12, 6, 12])
+print(displaySend(matrix))

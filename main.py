@@ -1,6 +1,9 @@
-import network
 import time
+
+import network
+
 import config
+import max7219
 
 # set the wlan in station mode and turn-on
 wlan = network.WLAN(network.STA_IF)
