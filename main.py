@@ -14,6 +14,8 @@ wlan.active(True)
 # create a RTC instance
 rtc = RTC()
 
+tzadd = config.TZADD
+
 
 def main():
     currentTime = ()
@@ -23,14 +25,23 @@ def main():
     currentTime = updateCurrentTime(currentTime)
     while True:
         if rtc.datetime()[0:7] != currentTime:
-            currentTime = rtc.datetime()[0:7]
-            formattedTime = formatTimeforMatrix(currentTime[4:7])
+            # make any adjustment for timezones
+            localtime = time.localtime(time.mktime(time.localtime()) + tzadd)
+
+            formattedTime = formatTimeforMatrix(localtime[3:6])
             matrix = buildMatrix(
                 0,
                 0,
                 formattedTime,
             )
             displaySend(matrix)
+            # update the currentTime again
+            currentTime = rtc.datetime()[0:7]
+
+            # if the hour marker is at 00 try to update
+            # the RTC to NTP
+            if rtc.datetime()[5] == 0:
+                getUTCTime()
 
 
 def connect_wifi():
