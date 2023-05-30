@@ -15,6 +15,24 @@ wlan.active(True)
 rtc = RTC()
 
 
+def main():
+    currentTime = ()
+    # check if connected to wifi, if not connect
+    connect_wifi()
+    getUTCTime()
+    currentTime = updateCurrentTime(currentTime)
+    while True:
+        if rtc.datetime()[0:7] != currentTime:
+            currentTime = rtc.datetime()[0:7]
+            formattedTime = formatTimeforMatrix(currentTime[4:7])
+            matrix = buildMatrix(
+                0,
+                0,
+                formattedTime,
+            )
+            displaySend(matrix)
+
+
 def connect_wifi():
     if not wlan.isconnected():
         wlan.connect(config.WIFI_SSID, config.WIFI_PASSWORD)
@@ -41,45 +59,8 @@ def getUTCTime():
     return timeCurrent
 
 
-# connect_wifi()
-matrix = buildMatrix(0, 0, [2, 13, 2, 11, 4, 13, 6, 13, 2, 13, 3])
-displaySend(matrix)
-
-
-def main():
-    currentTime = ()
-    # check if connected to wifi, if not connect
-    connect_wifi()
-    getUTCTime()
-    currentTime = updateCurrentTime(currentTime)
-    print(currentTime)
-    while True:
-        if rtc.datetime()[0:7] != currentTime:
-            currentTime = rtc.datetime()[0:7]
-            print(currentTime)
-            formattedTime = formatTime(currentTime[4:7])
-            print(formattedTime)
-            # matrix = buildMatrix(
-            #     0,
-            #     0,
-            #     [
-            #         int(hour[0]),
-            #         13,
-            #         int(hour[1]),
-            #         11,
-            #         int(minute[0]),
-            #         13,
-            #         int(minute[1]),
-            #         13,
-            #         int(second[0]),
-            #         int(second[1]),
-            #     ],
-            # )
-            # displaySend(matrix)
-
-
-def formatTime(currentTime):
-    print(currentTime)
+def formatTimeforMatrix(currentTime):
+    # print(currentTime)
     formattedTime = []
     returnedTime = []
     # convert all digits to strings
@@ -87,16 +68,40 @@ def formatTime(currentTime):
         formattedTime.append(str(t))
 
     # build a list of individual ints
+    # split the hours
     if len(formattedTime[0]) < 2:
         returnedTime.append(0)
-    returnedTime.append(int(formattedTime[0]))
+
+    [returnedTime.append(int(i)) for i in str(formattedTime[0])]
+
+    # split the minutes
     if len(formattedTime[1]) < 2:
         returnedTime.append(0)
-    returnedTime.append(int(formattedTime[1]))
+    [returnedTime.append(int(i)) for i in str(formattedTime[1])]
+
+    # split the seconds
     if len(formattedTime[2]) < 2:
         returnedTime.append(0)
-    returnedTime.append(int(formattedTime[2]))
-    return returnedTime
+    [returnedTime.append(int(i)) for i in str(formattedTime[2])]
+
+    # format to the required characters
+    requiredCharacters = [
+        returnedTime[0],
+        13,
+        returnedTime[1],
+        11,
+        returnedTime[2],
+        13,
+        returnedTime[3],
+        13,
+        13,
+        # shift the seconds to the 3x5 character set
+        returnedTime[4] + 14,
+        13,
+        returnedTime[5] + 14,
+    ]
+
+    return requiredCharacters
 
 
 def updateCurrentTime(currentTime):

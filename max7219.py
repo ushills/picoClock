@@ -1,6 +1,6 @@
 from machine import SPI, Pin
 from micropython import const
-import time
+from time import sleep
 
 _noOp = const(0)
 _decodemode = const(9)
@@ -18,7 +18,7 @@ cs = Pin(5, Pin.OUT)
 
 # Character set
 digits = [
-    ["1111", "1001", "1001", "1001", "1001", "1001", "1111"],  # 0
+    ["1111", "1001", "1001", "1001", "1001", "1001", "1111"],  # 0 4x7
     ["0001", "0001", "0001", "0001", "0001", "0001", "0001"],  # 1
     ["1111", "0001", "0001", "1111", "1000", "1000", "1111"],  # 2
     ["1111", "0001", "0001", "1111", "0001", "0001", "1111"],  # 3
@@ -32,6 +32,16 @@ digits = [
     ["000", "010", "010", "000", "010", "010", "000"],  # comma (11)
     ["000", "000", "000", "000", "000", "000", "010"],  # period (12)
     ["0", "0", "0", "0", "0", "0", "0"],  # separator (13)
+    ["000", "000", "111", "101", "101", "101", "111"],  # 0 3x5 (14)
+    ["000", "000", "001", "001", "001", "001", "001"],  # 1 (15)
+    ["000", "000", "111", "001", "111", "100", "111"],  # 2 (16)
+    ["000", "000", "111", "001", "111", "001", "111"],  # 3 (17)
+    ["000", "000", "101", "101", "111", "001", "001"],  # 4 (18)
+    ["000", "000", "111", "100", "111", "001", "111"],  # 5 (19)
+    ["000", "000", "111", "100", "111", "101", "111"],  # 6 (20)
+    ["000", "000", "111", "001", "001", "001", "001"],  # 7 (21)
+    ["000", "000", "111", "101", "111", "101", "111"],  # 8 (22)
+    ["000", "000", "111", "101", "111", "001", "001"],  # 9 (23)
 ]
 
 
@@ -94,11 +104,11 @@ def displayCommand(command, data):
 def displayInit():
     for command, data in (
         (_shutdown, 0),
-        (_displayTest, 0),
+        # (_displayTest, 1),
         (_scanlimit, 7),
         (_decodemode, 0),
-        (_shutdown, 0),
-        (_displayTest, 0),
+        # (_shutdown, 0),
+        # (_displayTest, 0),
     ):
         displayCommand(command, data)
 
@@ -114,10 +124,9 @@ def displayClear():
 displayInit()
 displayCommand(_shutdown, 0)
 displayCommand(_intensity, 5)
+displayCommand(_displayTest, 1)
+sleep(2)
+displayCommand(_displayTest, 0)
 displayClear()
 
 displayCommand(_shutdown, 1)
-
-
-# matrix = buildMatrix(0, 1, [2, 13, 2, 11, 4, 13, 6, 12])
-# displaySend(matrix)
