@@ -2,6 +2,7 @@ import time
 
 import network
 import ntptime
+import urequests
 from machine import RTC
 
 import config
@@ -14,7 +15,7 @@ wlan.active(True)
 # create a RTC instance
 rtc = RTC()
 
-tzadd = config.TZADD
+TZLOCATION = config.TZLOCATION
 
 
 def main():
@@ -23,10 +24,11 @@ def main():
     connect_wifi()
     getUTCTime()
     currentTime = updateCurrentTime(currentTime)
+    tzoffset = getTimezoneOffset(TZLOCATION)
     while True:
         if rtc.datetime()[0:7] != currentTime:
             # make any adjustment for timezones
-            localtime = time.localtime(time.mktime(time.localtime()) + tzadd)
+            localtime = time.localtime(time.mktime(time.localtime()) + tzoffset)
 
             formattedTime = formatTimeforMatrix(localtime[3:6])
             matrix = buildMatrix(
@@ -40,8 +42,9 @@ def main():
 
             # if the hour marker is at 00 try to update
             # the RTC to NTP
-            if rtc.datetime()[5] == 0:
+            if rtc.datetime()[4] == 1:
                 getUTCTime()
+                tzoffset = getTimezoneOffset(TZLOCATION)
 
 
 def connect_wifi():
@@ -52,6 +55,26 @@ def connect_wifi():
             time.sleep(1)
     wlan_config = wlan.ifconfig()
     print(wlan_config)
+
+
+def getTimezoneOffset(TZLOCATION):
+    if TZLOCATION == "IP":
+        tzinfo = urequests.get("https://worldtimeapi.org/api/ip")
+    else:
+        tzlocation = TZLOCATION
+        tzinfo = urequests.get("http://worldtimeapi.org/api/timezone/" + tzlocation)
+    if tzinfo.status_code == 200:
+        timezone = tzinfo.json()["timezone"]
+        dst = tzinfo.json()["dst"]
+        print("Timezone location =", timezone)
+        if dst is True:
+            print("DST Active")
+        tz_offset = tzinfo.json()["raw_offset"]
+        dst_offset = tzinfo.json()["dst_offset"]
+        return tz_offset + dst_offset
+    else:
+        print("Could not retreive timezone info reverting to UTC")
+        return 0
 
 
 def getUTCTime():
