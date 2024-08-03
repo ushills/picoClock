@@ -4,9 +4,10 @@ import network
 import ntptime
 import urequests
 from machine import RTC
+from machine import WDT
 
 import config
-from max7219 import buildMatrix, displaySend
+from max7219 import buildMatrix, displaySend, displayClear
 
 # set the wlan in station mode and turn-on
 wlan = network.WLAN(network.STA_IF)
@@ -15,7 +16,10 @@ wlan.active(True)
 # create a RTC instance
 rtc = RTC()
 
+# import configuration variables
 TZLOCATION = config.TZLOCATION
+DISPLAYOFFTIME = config.DISPLAYOFFTIME
+DISPLAYONTIME = config.DISPLAYONTIME
 
 
 def main():
@@ -25,18 +29,24 @@ def main():
     getUTCTime()
     currentTime = updateCurrentTime(currentTime)
     tzoffset = getTimezoneOffset(TZLOCATION)
+    # start a watchdog timer
+    wdt = WDT(timeout=5000)
     while True:
+        wdt.feed()
         if rtc.datetime()[0:7] != currentTime:
             # make any adjustment for timezones
             localtime = time.localtime(time.mktime(time.localtime()) + tzoffset)
-
+            print(localtime)
             formattedTime = formatTimeforMatrix(localtime[3:6])
             matrix = buildMatrix(
                 0,
                 0,
                 formattedTime,
             )
-            displaySend(matrix)
+            if displayOnCheck(localtime):
+                displaySend(matrix)
+            else:
+                displayClear()
             # update the currentTime again
             currentTime = rtc.datetime()[0:7]
 
@@ -55,6 +65,15 @@ def connect_wifi():
             time.sleep(1)
     wlan_config = wlan.ifconfig()
     print(wlan_config)
+
+
+def displayOnCheck(localtime):
+    # localtime format (2024, 8, 3, 16, 49, 28, 5, 216)
+    if int(DISPLAYOFFTIME) > int(localtime[3]) > (int(DISPLAYONTIME)-1):
+        # print ("Display On")
+        return True
+    # print("Display Off")
+    return False    
 
 
 def getTimezoneOffset(TZLOCATION):
